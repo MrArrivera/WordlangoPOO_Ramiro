@@ -1,0 +1,79 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package model {
+    enum Difficulty {
+        EASY
+        MEDIUM
+        HARD
+    }
+
+    enum Language {
+        SPANISH
+        ENGLISH
+    }
+
+    enum LetterResult {
+        CORRECT
+        MISPLACED
+        ABSENT
+    }
+
+    class WordEntry {
+        - definition: String
+        - length: int
+        - language: Language
+    }
+
+    class GuessResult {
+        - results: List<LetterResult>
+    }
+}
+
+package core {
+    class Dictionary {
+        - words: HashMap<String, WordEntry>
+        + loadWords(filePath: String): void
+        + contains(word: String): boolean
+        + getRandomWord(length: int, lang: Language): String
+        + addWord(word: String, entry: WordEntry): void
+    }
+
+    class WordlangoGame {
+        - dictionary: Dictionary
+        - usedLetters: HashSet<Character>
+        - remainingAttempts: int
+        - isGameOver: boolean
+        - isWon: boolean
+        + startGame(d: Difficulty, lang: Language): void
+        + submitGuess(word: String): GuessResult
+        + getHint(hintType: char): String
+        + isGameOver(): boolean
+        + isWon(): boolean
+        + getUsedLetters(): Set<Character>
+        + getRemainingAttempts(): int
+    }
+}
+
+package ui {
+    class ConsoleUI {
+        - game: WordlangoGame
+        + start(): void
+        - drawBoard(): void
+        - readUserInput(): String
+    }
+}
+
+' Relaciones estructurales (Composiciones y Dependencias)
+Dictionary "1" *-- "*" WordEntry : "words (HashMap)"
+GuessResult "1" *-- "*" LetterResult : "results"
+
+' Relaciones de uso
+ConsoleUI --> WordlangoGame : interactúa
+WordlangoGame --> Dictionary : usa
+WordlangoGame ..> GuessResult : devuelve
+WordlangoGame ..> Difficulty : configura
+WordlangoGame ..> Language : configura
+WordEntry --> Language : pertenece a
+
+@enduml
